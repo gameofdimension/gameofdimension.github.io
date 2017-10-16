@@ -1,0 +1,21 @@
+# Build settings
+markdown: kramdown
+permalink: pretty
+
+highlighter: rouge
+kramdown:
+    input: GFM
+auto_ids: true
+syntax_highlighter: rouge
+encoding: utf-8
+img_url: http://felixdae.github.io/images
+plugins:
+    - jekyll-feed
+theme: jekyll-theme-modernist
+
+defaults:
+    - scope:
+        path: ""
+      values:
+        layout: default
+
