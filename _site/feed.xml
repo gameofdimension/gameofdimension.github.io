@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.6.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2017-10-16T15:28:49+08:00</updated><id>http://localhost:4000/</id><entry><title type="html">neural network 损失函数非凸性一例</title><link href="http://localhost:4000/2017/10/16/nn-non-conv-proof/" rel="alternate" type="text/html" title="neural network 损失函数非凸性一例" /><published>2017-10-16T00:00:00+08:00</published><updated>2017-10-16T00:00:00+08:00</updated><id>http://localhost:4000/2017/10/16/nn-non-conv-proof</id><content type="html" xml:base="http://localhost:4000/2017/10/16/nn-non-conv-proof/">&lt;h1 id=&quot;neural-network-损失函数非凸性一例&quot;&gt;neural network 损失函数非凸性一例&lt;/h1&gt;
+
+&lt;h3 id=&quot;微博上爱可可转发了一个-quora-上关于证明神经网络损失函数非凸证明的讨论回答者是鼎鼎大名的-ian-goodfellow我不确定完整理解了-gooodfellow-的意思但是以此为启发结合之前在-cs231n-课程上学到的关于可视化损失函数在低维度上图像的方法我大致形成了证明这个问题的方法&quot;&gt;微博上&lt;a href=&quot;http://weibo.com/p/1005051402400261/home?is_all=1&quot;&gt;@爱可可&lt;/a&gt;转发了一个 quora 上关于证明神经网络损失函数&lt;a href=&quot;https://www.quora.com/How-can-you-prove-that-the-loss-functions-in-Deep-Neural-nets-are-non-convex&quot;&gt;非凸证明的讨论&lt;/a&gt;，回答者是鼎鼎大名的 Ian Goodfellow。我不确定完整理解了 Gooodfellow 的意思，但是以此为启发，结合之前在 cs231n 课程上学到的关于可视化损失函数在低维度上图像的方法，我大致形成了证明这个问题的方法。&lt;/h3&gt;
+
+&lt;h3 id=&quot;先描述一下问题定义--lwxy--为某用于分类任务的神经网络的损失函数其中--w--表示所有的可训练参数-x-y--分布表示训练数据中的特征和-label一般来讲--xy--是固定的于是我们即是要证明--l--相对于--w--有可能是非凸的&quot;&gt;先描述一下问题，定义 \( L(W;X,Y) \) 为某用于分类任务的神经网络的损失函数，其中 \( W \) 表示所有的可训练参数，\( X, Y \) 分布表示训练数据中的特征和 label。一般来讲 \( X,Y \) 是固定的，于是我们即是要证明 \( L \) 相对于 \( W \) 有可能是非凸的。&lt;/h3&gt;
+
+&lt;h3 id=&quot;以下提供一个证明步骤可能并不那么严谨但应该足以说明问题&quot;&gt;以下提供一个证明步骤，可能并不那么严谨，但应该足以说明问题：&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;构造一个神经网络实例，并将其损失函数用代码实现。&lt;/li&gt;
+  &lt;li&gt;生成两个随机向量 \( W_0, W_1 \) ，构造高维参数定义域 \( W \) 的一个一维子集 \( W_0+a{\cdot}W_1 \) ，其中 \( a \) 是可变标量。&lt;/li&gt;
+  &lt;li&gt;定义函数 \( f(a) = L(W_0+a{\cdot}W_1) \) ，证明一元函数 \( f \) 是非凸的。&lt;/li&gt;
+  &lt;li&gt;由 \( f \) 的非凸性推出 \( L \) 的非凸性。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;numpy&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;matplotlib&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mpl&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;matplotlib.pyplot&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;plt&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;matplotlib.pylab&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pylab&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# %matplotlib inline&lt;/span&gt;
+
+&lt;span class=&quot;o&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pylab&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;inline&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;pylab&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rcParams&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'figure.figsize'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;30&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;20&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Populating the interactive namespace from numpy and matplotlib
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;定义非线性激活函数-sigmoid&quot;&gt;定义非线性激活函数 sigmoid。&lt;/h3&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;sigmoid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;exp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;定义一个单隐层的全连接神经网络我们假定该神经网络用于二分类任务损失函数使用交叉熵&quot;&gt;定义一个单隐层的全连接神经网络。我们假定该神经网络用于二分类任务，损失函数使用交叉熵。&lt;/h3&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;nn_func&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;apply&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;hw&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hb&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lw&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lb&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sigmoid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sigmoid&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;hw&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;hb&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lw&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;lb&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mean&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;apply&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;生成一些训练数据也就是上面提到的--xy--&quot;&gt;生成一些训练数据，也就是上面提到的 \( X,Y \) 。&lt;/h3&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;img&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;label&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uniform&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;28&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;28&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uniform&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;astype&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;float32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;生成上面提到的--w_0-w_1--根据提到的神经网络定义参数包含隐层-weight隐层-bias输出层-weight输出层-bias&quot;&gt;生成上面提到的 \( W_0, W_1 \) ，根据提到的神经网络定义，参数包含隐层 weight，隐层 bias，输出层 weight，输出层 bias。&lt;/h3&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;base_hw&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;base_hb&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;base_lw&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;base_lb&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; \
+    &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uniform&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;28&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;28&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt;\
+    &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uniform&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt;\
+    &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uniform&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt;\
+    &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uniform&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;dir_hw&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dir_hb&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dir_lw&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dir_lb&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; \
+    &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uniform&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;28&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;28&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt;\
+    &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uniform&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt;\
+    &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uniform&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)),&lt;/span&gt;\
+    &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uniform&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;loss_func&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nn_func&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;img&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;label&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;loss_func&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;base_hw&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;base_hb&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;base_lw&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;base_lb&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;1.4699588455846047
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;到这里我们已经能够定义--f--函数了相对于严格的数学证明以下我采用不那么严谨的可视化方法来进行说明我们画出--f--在一定范围内的图像观察其是否非凸&quot;&gt;到这里我们已经能够定义 \( f \) 函数了，相对于严格的数学证明，以下我采用不那么严谨的可视化方法来进行说明。我们画出 \( f \) 在一定范围内的图像，观察其是否非凸。&lt;/h3&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;gma&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;linspace&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;1.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;3.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;loss&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;gma&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;hw&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;base_hw&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dir_hw&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;hb&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;base_hb&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dir_hb&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;lw&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;base_lw&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dir_lw&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;lb&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;base_lb&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dir_lb&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;loss&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;append&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;loss_func&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;hw&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hb&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lw&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lb&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;plt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;plot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;gma&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;loss&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;[&amp;lt;matplotlib.lines.Line2D at 0x12238cfd0&amp;gt;]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://gameofdimension.github.io/images/output_15_1.png&quot; alt=&quot;png&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;从上面的图像可以很明显的看出来--f--是非凸的下面就来从--f--的非凸性推导--l--的非凸性&quot;&gt;从上面的图像可以很明显的看出来 \( f \) 是非凸的。下面就来从 \( f \) 的非凸性推导 \( L \) 的非凸性。&lt;/h3&gt;
+
+&lt;p&gt;由 \( f \) 非凸，可知有 \( a_1, a_2, \alpha, \beta \) 满足 \( f(\alpha\cdot{a_1} + \beta\cdot{a_2}) &amp;gt; \alpha\cdot{f(a_1)} + \beta\cdot{f(a_2)} \)，其中 \( \alpha &amp;gt; 0, \beta &amp;gt; 0, \alpha + \beta = 1 \)。&lt;/p&gt;
+
+&lt;p&gt;由 \( f \) 与 \( L \) 的关系，我们有 \( f(\alpha\cdot{a_1} + \beta\cdot{a_2}) = L(W_0+({\alpha\cdot{a_1} + \beta\cdot{a_2}}){\cdot}W_1) &amp;gt; \alpha\cdot{L(W_0+a_1{\cdot}W_1)} + \beta\cdot{L(W_0+a_2{\cdot}W_1)} \)&lt;/p&gt;
+
+&lt;p&gt;而 \( L(W_0+({\alpha\cdot{a_1} + \beta\cdot{a_2}}){\cdot}W_1) = L(\alpha\cdot(W_0+{a_1}\cdot{W_1}) + \beta\cdot(W_0 + {a_2}\cdot{W_1})) \) ，从而 \( L(\alpha\cdot(W_0+{a_1}\cdot{W_1}) + \beta\cdot(W_0 + {a_2}\cdot{W_1})) &amp;gt; \alpha\cdot{L(W_0+a_1{\cdot}W_1)} + \beta\cdot{L(W_0+a_2{\cdot}W_1)} \)  ，而这正好说明了 \( L \) 的非凸性。&lt;/p&gt;
+
+&lt;h3 id=&quot;到此我们证明了存在有些神经网络损失函数是非凸的&quot;&gt;到此我们证明了存在有些神经网络损失函数是非凸的。&lt;/h3&gt;
+
+&lt;p&gt;另外对于由 \( f \) 的非凸性推导 \( L \) 的非凸性，或许我们可以借助一个低维类比来获得一些直观理解。&lt;/p&gt;
+
+&lt;p&gt;我们假定 \( W \) 只有2维，那么整个 \( L \) 的图像就可以在三维坐标中展示出来，其形状我们假设是个可能不那么规则的碗状。上面我们做的事情就是在某个位置，从正上方到正下方垂直向这个碗劈一刀，留下的截面就只是一个类似上面的曲线而已。如果我们在这条曲线上发现了一个非凸的实例，那么我们再把视野放到整个碗状图像，这个非凸实例依然是成立的。&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><summary type="html">neural network 损失函数非凸性一例</summary></entry><entry><title type="html">隐马可夫模型与中文分词</title><link href="http://localhost:4000/2017/06/11/hmm-and-chinese-word-segment/" rel="alternate" type="text/html" title="隐马可夫模型与中文分词" /><published>2017-06-11T00:00:00+08:00</published><updated>2017-06-11T00:00:00+08:00</updated><id>http://localhost:4000/2017/06/11/hmm-and-chinese-word-segment</id><content type="html" xml:base="http://localhost:4000/2017/06/11/hmm-and-chinese-word-segment/">&lt;h1 id=&quot;隐马可夫模型与中文分词&quot;&gt;隐马可夫模型与中文分词&lt;/h1&gt;
+
+&lt;h3 id=&quot;前段时间为了建模模板问题研究了一下-hmm-模型虽然最终并没有用-hmm-来解决模板问题但是好歹-hmm-给我们提供了重要的思路在这里把之前了解的关于-hmm-的知识总结记录一下&quot;&gt;前段时间为了建模模板问题，研究了一下 hmm 模型，虽然最终并没有用 hmm 来解决模板问题，但是好歹 hmm 给我们提供了重要的思路。在这里把之前了解的关于 hmm 的知识总结记录一下。&lt;/h3&gt;
+
+&lt;h3 id=&quot;hmm-假定观察到的事实是由不可观察的隐藏变量决定的同时此刻的隐藏变量只取决于上一时刻的隐藏变量状态而与再之前的隐藏变量状态无关同时这种依赖关系也与时间无关也就是说时刻1时隐藏变量对时刻0时隐藏变量状态的依赖关系跟时刻10时隐藏变量对时刻9时隐藏变量的依赖关系完全一样假定时刻-t-时的隐藏状态为--s_t-此刻的可观察变量为--o_t-用数学公式表达以上关系则为&quot;&gt;hmm 假定观察到的事实是由不可观察的隐藏变量决定的，同时此刻的隐藏变量只取决于上一时刻的隐藏变量状态，而与再之前的隐藏变量状态无关。同时这种依赖关系也与时间无关，也就是说时刻1时隐藏变量对时刻0时隐藏变量状态的依赖关系跟时刻10时隐藏变量对时刻9时隐藏变量的依赖关系完全一样。假定时刻 t 时的隐藏状态为 \( s_t \)，此刻的可观察变量为 \( o_t \)。用数学公式表达以上关系则为：&lt;/h3&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;\( p(o_t|o_{t-1},o_{t-2}..,s_{t-1},s_{t-2}..) = p(o_t|s_{t-1}) \)     &lt;br /&gt;
+\( p(s_t|s_{t-1},s_{t-2}..) = p(s_t|s_{t-1}) \)      &lt;br /&gt;
+\( p(S_t|S_{t-1})=constant \)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;要说明的上面第三点并不是说对于某个具体相邻时刻隐藏状态赋值有这种关系而是说只要相邻的两个时刻隐藏状态赋值一样这种概率关系与时间无关而相邻的两个时刻隐藏状态赋值是有许多种可能的&quot;&gt;要说明的上面第三点并不是说对于某个具体相邻时刻隐藏状态赋值有这种关系，而是说只要相邻的两个时刻隐藏状态赋值一样，这种概率关系与时间无关。而相邻的两个时刻隐藏状态赋值是有许多种可能的。&lt;/h3&gt;
+
+&lt;h3 id=&quot;于是从定义上讲一个-hmm-由以下5个元素构成&quot;&gt;于是从定义上讲，一个 hmm 由以下5个元素构成：&lt;/h3&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;StatusSet：隐藏状态集合&lt;/li&gt;
+  &lt;li&gt;ObservedSet：观察值集合&lt;/li&gt;
+  &lt;li&gt;TransProbMatrix：隐藏状态之间的转移概率矩阵&lt;/li&gt;
+  &lt;li&gt;EmitProbMatrix：隐藏状态决定观察值的发射概率矩阵&lt;/li&gt;
+  &lt;li&gt;InitStatus：初始状态概率分布&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;hmm-模型中通常有三类问题&quot;&gt;hmm 模型中通常有三类问题：&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;已知模型参数和观察序列 \( (o_1,o_2,..,o_T) \) ，求观测序列在给定模型下出现的概率。&lt;/li&gt;
+  &lt;li&gt;已知模型和观察序列，求概率最大隐藏状态序列。&lt;/li&gt;
+  &lt;li&gt;已知观察序列，估计模型参数。也就是求得模型参数，使得在此模型下，观察序列出现的概率最大。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;第一类问题只是简单的计算问题只是其中计算方法需要些技巧一般的方法是动态规划分前向与后向两种思路&quot;&gt;第一类问题只是简单的计算问题，只是其中计算方法需要些技巧，一般的方法是动态规划，分前向与后向两种思路。&lt;/h3&gt;
+
+&lt;h3 id=&quot;第三类问题因为输入信息量少但是输出信息量却很大其效果也要打问号一般的求解方法是-em-算法&quot;&gt;第三类问题因为输入信息量少，但是输出信息量却很大，其效果也要打问号。一般的求解方法是 EM 算法。&lt;/h3&gt;
+
+&lt;h3 id=&quot;第二类问题应用广泛比如著名的中文分词问题就可以用其建模接下来就详细说明一下&quot;&gt;第二类问题应用广泛，比如著名的中文分词问题就可以用其建模。接下来就详细说明一下。&lt;/h3&gt;
+
+&lt;h3 id=&quot;假定有一个中文句子隐藏状态之间的转移概率矩阵这里的每个汉字就对应一个观察值而观察值背后的隐藏状态则如下定义&quot;&gt;假定有一个中文句子：“隐藏状态之间的转移概率矩阵”。这里的每个汉字就对应一个观察值，而观察值背后的隐藏状态则如下定义：&lt;/h3&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;B：词开始
+M：词中部
+E：词结尾
+S：单字成词&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;比如隐字对应的隐藏状态就是-b--藏字对应对应的隐藏状态就是-e--的-字对应的隐藏状态就是-s-对于一句话我们只要确定了每个字对应的隐藏状态也就确定了这句话的分词方案&quot;&gt;比如“隐”字对应的隐藏状态就是 B , “藏”字对应对应的隐藏状态就是 E , “的” 字对应的隐藏状态就是 S 。对于一句话我们只要确定了每个字对应的隐藏状态，也就确定了这句话的分词方案。&lt;/h3&gt;
+
+&lt;h3 id=&quot;对比上面的模型5要素我们已经有了-statusset-而另外四个部分都可以通过统计语料库获得&quot;&gt;对比上面的模型5要素，我们已经有了 StatusSet， 而另外四个部分都可以通过统计语料库获得。&lt;/h3&gt;
+
+&lt;h3 id=&quot;对于我们要解决的问题当然有一个-naive-的算法就是枚举所有可能的隐藏状态序列计算其概率选择对应概率最大的那个序列赋值这个算法虽然直观但是确是低效的其时间效率是指数级别的&quot;&gt;对于我们要解决的问题，当然有一个 naive 的算法，就是枚举所有可能的隐藏状态序列，计算其概率，选择对应概率最大的那个序列赋值。这个算法虽然直观，但是确是低效的，其时间效率是指数级别的。&lt;/h3&gt;
+
+&lt;h3 id=&quot;通常解决这个问题的算法是维特比算法这个算法其实也就是动态规划方法的具体应用如下面这张图就是要求从起点-start-开始经过中间每一层到达最后一层的一个最大路径要注意的是这个图是有向的而且只在相邻层之间有边连接将问题做了这样的抽象之后要得出详细的递推关系也就不难了具体可以参照维基百科&quot;&gt;通常解决这个问题的算法是维特比算法，这个算法其实也就是动态规划方法的具体应用。如下面这张图，就是要求从起点 start 开始，经过中间每一层到达最后一层的一个最大路径。要注意的是这个图是有向的，而且只在相邻层之间有边连接。将问题做了这样的抽象之后，要得出详细的递推关系也就不难了，具体可以参照维基百科。&lt;/h3&gt;
+&lt;p&gt;&lt;img src=&quot;images/14971947528379.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;参考&quot;&gt;参考：&lt;/h2&gt;
+&lt;p&gt;统计学习方法，李航
+&lt;a href=&quot;http://yanyiwu.com/work/2014/04/07/hmm-segment-xiangjie.html&quot;&gt;中文分词之HMM模型详解&lt;/a&gt;
+&lt;a href=&quot;https://en.wikipedia.org/wiki/Viterbi_algorithm&quot;&gt;维基百科&lt;/a&gt;&lt;/p&gt;</content><author><name></name></author><summary type="html">隐马可夫模型与中文分词</summary></entry></feed>

@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+<!-- Begin Jekyll SEO tag v2.3.0 -->
+<title>neural network 损失函数非凸性一例</title>
+<meta property="og:title" content="neural network 损失函数非凸性一例" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="neural network 损失函数非凸性一例" />
+<meta property="og:description" content="neural network 损失函数非凸性一例" />
+<link rel="canonical" href="http://localhost:4000/2017/10/16/nn-non-conv-proof/" />
+<meta property="og:url" content="http://localhost:4000/2017/10/16/nn-non-conv-proof/" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2017-10-16T00:00:00+08:00" />
+<script type="application/ld+json">
+{"name":null,"description":"neural network 损失函数非凸性一例","author":null,"@type":"BlogPosting","url":"http://localhost:4000/2017/10/16/nn-non-conv-proof/","publisher":null,"image":null,"headline":"neural network 损失函数非凸性一例","dateModified":"2017-10-16T00:00:00+08:00","datePublished":"2017-10-16T00:00:00+08:00","sameAs":null,"mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2017/10/16/nn-non-conv-proof/"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+    <link href='https://fonts.googleapis.com/css?family=Lato:300italic,700italic,300,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="/assets/css/style.css?v=">
+    <script src="/assets/js/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header  class="without-description" >
+        <h1></h1>
+        
+        <p class="view"><a href="">View the Project on GitHub <small></small></a></p>
+        <ul>
+        
+          <li><a href="">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+
+      <h1 id="neural-network-损失函数非凸性一例">neural network 损失函数非凸性一例</h1>
+
+<h3 id="微博上爱可可转发了一个-quora-上关于证明神经网络损失函数非凸证明的讨论回答者是鼎鼎大名的-ian-goodfellow我不确定完整理解了-gooodfellow-的意思但是以此为启发结合之前在-cs231n-课程上学到的关于可视化损失函数在低维度上图像的方法我大致形成了证明这个问题的方法">微博上<a href="http://weibo.com/p/1005051402400261/home?is_all=1">@爱可可</a>转发了一个 quora 上关于证明神经网络损失函数<a href="https://www.quora.com/How-can-you-prove-that-the-loss-functions-in-Deep-Neural-nets-are-non-convex">非凸证明的讨论</a>，回答者是鼎鼎大名的 Ian Goodfellow。我不确定完整理解了 Gooodfellow 的意思，但是以此为启发，结合之前在 cs231n 课程上学到的关于可视化损失函数在低维度上图像的方法，我大致形成了证明这个问题的方法。</h3>
+
+<h3 id="先描述一下问题定义--lwxy--为某用于分类任务的神经网络的损失函数其中--w--表示所有的可训练参数-x-y--分布表示训练数据中的特征和-label一般来讲--xy--是固定的于是我们即是要证明--l--相对于--w--有可能是非凸的">先描述一下问题，定义 \( L(W;X,Y) \) 为某用于分类任务的神经网络的损失函数，其中 \( W \) 表示所有的可训练参数，\( X, Y \) 分布表示训练数据中的特征和 label。一般来讲 \( X,Y \) 是固定的，于是我们即是要证明 \( L \) 相对于 \( W \) 有可能是非凸的。</h3>
+
+<h3 id="以下提供一个证明步骤可能并不那么严谨但应该足以说明问题">以下提供一个证明步骤，可能并不那么严谨，但应该足以说明问题：</h3>
+
+<ol>
+  <li>构造一个神经网络实例，并将其损失函数用代码实现。</li>
+  <li>生成两个随机向量 \( W_0, W_1 \) ，构造高维参数定义域 \( W \) 的一个一维子集 \( W_0+a{\cdot}W_1 \) ，其中 \( a \) 是可变标量。</li>
+  <li>定义函数 \( f(a) = L(W_0+a{\cdot}W_1) \) ，证明一元函数 \( f \) 是非凸的。</li>
+  <li>由 \( f \) 的非凸性推出 \( L \) 的非凸性。</li>
+</ol>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="n">mpl</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pylab</span> <span class="k">as</span> <span class="n">pylab</span>
+<span class="c"># %matplotlib inline</span>
+
+<span class="o">%</span><span class="n">pylab</span> <span class="n">inline</span>
+<span class="n">pylab</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s">'figure.figsize'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Populating the interactive namespace from numpy and matplotlib
+</code></pre></div></div>
+
+<h3 id="定义非线性激活函数-sigmoid">定义非线性激活函数 sigmoid。</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">))</span>
+</code></pre></div></div>
+
+<h3 id="定义一个单隐层的全连接神经网络我们假定该神经网络用于二分类任务损失函数使用交叉熵">定义一个单隐层的全连接神经网络。我们假定该神经网络用于二分类任务，损失函数使用交叉熵。</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">nn_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="n">hw</span><span class="p">,</span> <span class="n">hb</span><span class="p">,</span> <span class="n">lw</span><span class="p">,</span> <span class="n">lb</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">hw</span><span class="p">)</span><span class="o">+</span><span class="n">hb</span><span class="p">)</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">lw</span><span class="p">)</span><span class="o">+</span><span class="n">lb</span><span class="p">)</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">y</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">y</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">p</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="nb">apply</span>
+</code></pre></div></div>
+
+<h3 id="生成一些训练数据也就是上面提到的--xy--">生成一些训练数据，也就是上面提到的 \( X,Y \) 。</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">img</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">28</span><span class="o">*</span><span class="mi">28</span><span class="p">)),</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="生成上面提到的--w_0-w_1--根据提到的神经网络定义参数包含隐层-weight隐层-bias输出层-weight输出层-bias">生成上面提到的 \( W_0, W_1 \) ，根据提到的神经网络定义，参数包含隐层 weight，隐层 bias，输出层 weight，输出层 bias。</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">base_hw</span><span class="p">,</span> <span class="n">base_hb</span><span class="p">,</span> <span class="n">base_lw</span><span class="p">,</span> <span class="n">base_lb</span> <span class="o">=</span> \
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">28</span><span class="o">*</span><span class="mi">28</span><span class="p">,</span><span class="mi">100</span><span class="p">)),</span>\
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">100</span><span class="p">)),</span>\
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="mi">1</span><span class="p">)),</span>\
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+
+<span class="n">dir_hw</span><span class="p">,</span> <span class="n">dir_hb</span><span class="p">,</span> <span class="n">dir_lw</span><span class="p">,</span> <span class="n">dir_lb</span> <span class="o">=</span> \
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">28</span><span class="o">*</span><span class="mi">28</span><span class="p">,</span><span class="mi">100</span><span class="p">)),</span>\
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">100</span><span class="p">)),</span>\
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="mi">1</span><span class="p">)),</span>\
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">loss_func</span> <span class="o">=</span> <span class="n">nn_func</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
+<span class="n">loss_func</span><span class="p">(</span><span class="n">base_hw</span><span class="p">,</span> <span class="n">base_hb</span><span class="p">,</span> <span class="n">base_lw</span><span class="p">,</span> <span class="n">base_lb</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1.4699588455846047
+</code></pre></div></div>
+
+<h3 id="到这里我们已经能够定义--f--函数了相对于严格的数学证明以下我采用不那么严谨的可视化方法来进行说明我们画出--f--在一定范围内的图像观察其是否非凸">到这里我们已经能够定义 \( f \) 函数了，相对于严格的数学证明，以下我采用不那么严谨的可视化方法来进行说明。我们画出 \( f \) 在一定范围内的图像，观察其是否非凸。</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">gma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">3.0</span><span class="p">,</span><span class="mi">10000</span><span class="p">)</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="p">[]</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">gma</span><span class="p">:</span>
+    <span class="n">hw</span> <span class="o">=</span> <span class="n">base_hw</span> <span class="o">+</span> <span class="n">t</span><span class="o">*</span><span class="n">dir_hw</span>
+    <span class="n">hb</span> <span class="o">=</span> <span class="n">base_hb</span> <span class="o">+</span> <span class="n">t</span><span class="o">*</span><span class="n">dir_hb</span>
+    <span class="n">lw</span> <span class="o">=</span> <span class="n">base_lw</span> <span class="o">+</span> <span class="n">t</span><span class="o">*</span><span class="n">dir_lw</span>
+    <span class="n">lb</span> <span class="o">=</span> <span class="n">base_lb</span> <span class="o">+</span> <span class="n">t</span><span class="o">*</span><span class="n">dir_lb</span>
+    <span class="n">loss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss_func</span><span class="p">(</span><span class="n">hw</span><span class="p">,</span> <span class="n">hb</span><span class="p">,</span> <span class="n">lw</span><span class="p">,</span> <span class="n">lb</span><span class="p">))</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">gma</span><span class="p">),</span> <span class="n">loss</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[&lt;matplotlib.lines.Line2D at 0x12238cfd0&gt;]
+</code></pre></div></div>
+
+<p><img src="https://gameofdimension.github.io/images/output_15_1.png" alt="png" /></p>
+
+<h3 id="从上面的图像可以很明显的看出来--f--是非凸的下面就来从--f--的非凸性推导--l--的非凸性">从上面的图像可以很明显的看出来 \( f \) 是非凸的。下面就来从 \( f \) 的非凸性推导 \( L \) 的非凸性。</h3>
+
+<p>由 \( f \) 非凸，可知有 \( a_1, a_2, \alpha, \beta \) 满足 \( f(\alpha\cdot{a_1} + \beta\cdot{a_2}) &gt; \alpha\cdot{f(a_1)} + \beta\cdot{f(a_2)} \)，其中 \( \alpha &gt; 0, \beta &gt; 0, \alpha + \beta = 1 \)。</p>
+
+<p>由 \( f \) 与 \( L \) 的关系，我们有 \( f(\alpha\cdot{a_1} + \beta\cdot{a_2}) = L(W_0+({\alpha\cdot{a_1} + \beta\cdot{a_2}}){\cdot}W_1) &gt; \alpha\cdot{L(W_0+a_1{\cdot}W_1)} + \beta\cdot{L(W_0+a_2{\cdot}W_1)} \)</p>
+
+<p>而 \( L(W_0+({\alpha\cdot{a_1} + \beta\cdot{a_2}}){\cdot}W_1) = L(\alpha\cdot(W_0+{a_1}\cdot{W_1}) + \beta\cdot(W_0 + {a_2}\cdot{W_1})) \) ，从而 \( L(\alpha\cdot(W_0+{a_1}\cdot{W_1}) + \beta\cdot(W_0 + {a_2}\cdot{W_1})) &gt; \alpha\cdot{L(W_0+a_1{\cdot}W_1)} + \beta\cdot{L(W_0+a_2{\cdot}W_1)} \)  ，而这正好说明了 \( L \) 的非凸性。</p>
+
+<h3 id="到此我们证明了存在有些神经网络损失函数是非凸的">到此我们证明了存在有些神经网络损失函数是非凸的。</h3>
+
+<p>另外对于由 \( f \) 的非凸性推导 \( L \) 的非凸性，或许我们可以借助一个低维类比来获得一些直观理解。</p>
+
+<p>我们假定 \( W \) 只有2维，那么整个 \( L \) 的图像就可以在三维坐标中展示出来，其形状我们假设是个可能不那么规则的碗状。上面我们做的事情就是在某个位置，从正上方到正下方垂直向这个碗劈一刀，留下的截面就只是一个类似上面的曲线而已。如果我们在这条曲线上发现了一个非凸的实例，那么我们再把视野放到整个碗状图像，这个非凸实例依然是成立的。</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+</code></pre></div></div>
+
+
+
+      </section>
+    </div>
+    <footer>
+    
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+
+    
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  </body>
+</html>
