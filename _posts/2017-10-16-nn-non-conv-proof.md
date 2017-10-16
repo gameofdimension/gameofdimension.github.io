@@ -131,7 +131,7 @@ plt.plot(np.array(gma), loss)
 
 由 $f$ 与 $L$ 的关系，我们有 $f(\alpha\cdot{a_1} + \beta\cdot{a_2}) = L(W_0+({\alpha\cdot{a_1} + \beta\cdot{a_2}}){\cdot}W_1) > \alpha\cdot{L(W_0+a_1{\cdot}W_1)} + \beta\cdot{L(W_0+a_2{\cdot}W_1)}$     
 
-而 $L(W_0+({\alpha\cdot{a_1} + \beta\cdot{a_2}}){\cdot}W_1) = L(\alpha\cdot(W_0+{{a_1}\cdot{W_1}) + \beta\cdot(W_0 + {a_2}\cdot}W_1))$，从而 $L(\alpha\cdot(W_0+{{a_1}\cdot{W_1}) + \beta\cdot(W_0 + {a_2}\cdot}W_1)) > \alpha\cdot{L(W_0+a_1{\cdot}W_1)} + \beta\cdot{L(W_0+a_2{\cdot}W_1)}$ ，而这正好说明了 $L$ 的非凸性。
+而 $L(W_0+({\alpha\cdot{a_1} + \beta\cdot{a_2}}){\cdot}W_1) = L(\alpha\cdot(W_0+{a_1}\cdot{W_1}) + \beta\cdot(W_0 + {a_2}\cdot}W_1))$，从而 $L(\alpha\cdot(W_0+{a_1}\cdot{W_1}) + \beta\cdot(W_0 + {a_2}\cdot}W_1)) > \alpha\cdot{L(W_0+a_1{\cdot}W_1)} + \beta\cdot{L(W_0+a_2{\cdot}W_1)}$ ，而这正好说明了 $L$ 的非凸性。
 
 ### 到此我们证明了存在有些神经网络损失函数是非凸的。
 
