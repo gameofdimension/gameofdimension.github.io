@@ -8,7 +8,7 @@ kramdown:
 auto_ids: true
 syntax_highlighter: rouge
 encoding: utf-8
-img_url: http://felixdae.github.io/images
+img_url: http://gameofdimension.github.io/images
 plugins:
     - jekyll-feed
 theme: jekyll-theme-modernist

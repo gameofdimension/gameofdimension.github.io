@@ -1,3 +1,9 @@
+---
+title: neural network 损失函数非凸性一例
+---
+
+{{ page.title }}
+===============
 
 ### 微博上[@爱可可](http://weibo.com/p/1005051402400261/home?is_all=1)转发了一个 quora 上关于证明神经网络损失函数[非凸证明的讨论](https://www.quora.com/How-can-you-prove-that-the-loss-functions-in-Deep-Neural-nets-are-non-convex)，回答者是鼎鼎大名的 Ian Goodfellow。我不确定完整理解了 Gooodfellow 的意思，但是以此为启发，结合之前在 cs231n 课程上学到的关于可视化损失函数在低维度上图像的方法，我大致形成了证明这个问题的方法。
 
