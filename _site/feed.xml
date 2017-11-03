@@ -1,4 +1,84 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.6.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2017-10-16T15:33:14+08:00</updated><id>http://localhost:4000/</id><entry><title type="html">neural network 损失函数非凸性一例</title><link href="http://localhost:4000/2017/10/16/nn-non-conv-proof/" rel="alternate" type="text/html" title="neural network 损失函数非凸性一例" /><published>2017-10-16T00:00:00+08:00</published><updated>2017-10-16T00:00:00+08:00</updated><id>http://localhost:4000/2017/10/16/nn-non-conv-proof</id><content type="html" xml:base="http://localhost:4000/2017/10/16/nn-non-conv-proof/">&lt;h1 id=&quot;neural-network-损失函数非凸性一例&quot;&gt;neural network 损失函数非凸性一例&lt;/h1&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.6.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2017-11-03T14:12:51+08:00</updated><id>http://localhost:4000/</id><entry><title type="html">明天太阳还会照常升起吗？</title><link href="http://localhost:4000/2017/11/03/bayesian-inference/" rel="alternate" type="text/html" title="明天太阳还会照常升起吗？" /><published>2017-11-03T00:00:00+08:00</published><updated>2017-11-03T00:00:00+08:00</updated><id>http://localhost:4000/2017/11/03/bayesian-inference</id><content type="html" xml:base="http://localhost:4000/2017/11/03/bayesian-inference/">&lt;h1 id=&quot;明天太阳还会照常升起吗&quot;&gt;明天太阳还会照常升起吗？&lt;/h1&gt;
+
+&lt;h3 id=&quot;罗辑思维讲过贝叶斯思维即所谓不断用新的证据还更新自己的原有认知作为理科生要让文科生来科普贝叶斯自然羞耻但同样羞耻的是我居然不知道这样的更新过程在数学上到底是如何实现的&quot;&gt;罗辑思维讲过贝叶斯思维，即所谓不断用新的证据还更新自己的原有认知。作为理科生要让文科生来科普贝叶斯自然羞耻，但同样羞耻的是我居然不知道这样的更新过程在数学上到底是如何实现的。&lt;/h3&gt;
+
+&lt;h3 id=&quot;比如今天太阳照样升起了跟昨天以及我有生以来的任何一天一样那相比于今天我对于明天太阳升起的信念该如何变化呢&quot;&gt;比如今天太阳照样升起了——跟昨天以及我有生以来的任何一天一样，那相比于今天，我对于明天太阳升起的信念该如何变化呢。&lt;/h3&gt;
+
+&lt;h3 id=&quot;假设今天只是我来到人世间的第三天而已在今天太阳升起之前考虑到昨天前天太阳已经升起过了我假定今天太阳升起的概率是051略微高于瞎蒙的05套用贝叶斯的那一套这是否就是所谓的先验呢现在已是中午今天的太阳已经升起过了那明天太阳升起的概率该是多少这是否就是所谓的后验套用贝叶斯公式来进行计算&quot;&gt;假设今天只是我来到人世间的第三天而已。在今天太阳升起之前，考虑到昨天前天太阳已经升起过了，我假定今天太阳升起的概率是0.51，略微高于瞎蒙的0.5，套用贝叶斯的那一套，这是否就是所谓的先验呢？现在已是中午，今天的太阳已经升起过了，那明天太阳升起的概率该是多少，这是否就是所谓的后验？套用贝叶斯公式来进行计算：&lt;/h3&gt;
+
+&lt;p&gt;\[ p(X_3=1|X_1=1,X_2=1) = \frac {p(X_3=1)\cdotp(X_1=1,X_2=1|X_3=1)} {p(X_1=1,X_2=1)} \]&lt;/p&gt;
+
+&lt;h3 id=&quot;到此我们遇到了困难因为我们不知道怎么计算-px_11x_21x_31-和-px_11x_21昨天和前天太阳都已经升起了px_11x_21应该等于1吗答案是不能我们假定如果是在未来的连续三天上做同样的分析那显然没法说这个概率就是1了另外我们能说-x_1-x_2-x_3独立吗如果是的话上面的推导都没有意义了因为这样的话-px_31x_11x_21--px_31也就是后验等于先验我们的信心没有改变&quot;&gt;到此我们遇到了困难，因为我们不知道怎么计算 \(p(X_1=1,X_2=1|X_3=1)\) 和 \(p(X_1=1,X_2=1)\)。昨天和前天太阳都已经升起了，\(p(X_1=1,X_2=1)\)应该等于1吗？答案是不能，我们假定如果是在未来的连续三天上做同样的分析，那显然没法说这个概率就是1了。另外我们能说 \(X_1, X_2, X_3\)独立吗，如果是的话，上面的推导都没有意义了，因为这样的话\( p(X_3=1|X_1=1,X_2=1) = p(X_3=1)\)，也就是后验等于先验，我们的信心没有改变。&lt;/h3&gt;
+
+&lt;h3 id=&quot;老实说这个疑问徘徊心头至少也有几个月了直到我来到这个知乎页面贝叶斯推断如何更新后验概率坦率讲这里面很多人的答案我都没有看懂但是当我看到这一句用贝叶斯的写法先验概率是一个分布突然有了被击中的感觉于是我大概知道了上面太阳升起的例子该如何解释了&quot;&gt;老实说这个疑问徘徊心头至少也有几个月了，直到我来到这个知乎页面&lt;a href=&quot;https://www.zhihu.com/question/27398304&quot;&gt;“贝叶斯推断如何更新后验概率？”&lt;/a&gt;。坦率讲这里面很多人的答案我都没有看懂，但是当我看到这一句&lt;em&gt;“用贝叶斯的写法，先验概率是一个分布。”&lt;/em&gt;突然有了被击中的感觉。于是我大概知道了上面太阳升起的例子该如何解释了。&lt;/h3&gt;
+
+&lt;h3 id=&quot;首先我们的先验应该是针对某个重复发生的现象或者说是针对某个理论而不是跟上面一样针对某次具体实验因为具体实验发生了就发生了再也没有同一个了也就不存在更新信念的问题其实我们想知道的是关于太阳升起的概率可以对照成某枚硬币抛出head的概率的理论&quot;&gt;首先我们的先验应该是针对某个重复发生的现象，或者说是针对某个理论，而不是跟上面一样针对某次具体实验，因为具体实验发生了就发生了，再也没有同一个了，也就不存在更新信念的问题。其实我们想知道的是关于太阳升起的概率（可以对照成某枚硬币抛出head的概率）的理论。&lt;/h3&gt;
+
+&lt;h3 id=&quot;然后我们应用上面提到的先验概率是个分布的想法这里又需要一个假设即这个先验分布该是怎样的我们假定关于太阳升起的概率这个值本身符合以下分布&quot;&gt;然后我们应用上面提到的先验概率是个分布的想法。这里又需要一个假设，即这个先验分布该是怎样的。我们假定关于太阳升起的概率这个值本身符合以下分布：&lt;/h3&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;q&lt;/th&gt;
+      &lt;th&gt;0.5&lt;/th&gt;
+      &lt;th&gt;0.6&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;p&lt;/td&gt;
+      &lt;td&gt;0.9&lt;/td&gt;
+      &lt;td&gt;0.1&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h3 id=&quot;也就是说我认为太阳升起的概率只有两种可能或者为05或者为06同时我对这个值为05的信心为09是06的信心只有01&quot;&gt;也就是说我认为太阳升起的概率只有两种可能，或者为0.5，或者为0.6，同时我对这个值为0.5的信心为0.9，是0.6的信心只有0.1。&lt;/h3&gt;
+
+&lt;h3 id=&quot;有了以上的铺垫我们再来分析假定观察到连续两天太阳升起了太阳升起的概率这个值的分布该如何变化呢&quot;&gt;有了以上的铺垫，我们再来分析。假定观察到连续两天太阳升起了，太阳升起的概率这个值的分布该如何变化呢：&lt;/h3&gt;
+&lt;p&gt;\[ p(q=0.5|X_1=1,X_2=1) = \frac {p(q=0.5)\cdotp(X_1=1,X_2=1|q=0.5)} {p(X_1=1,X_2=1)} = \frac {0.9\cdot0.5\cdot0.5} {p(X_1=1,X_2=1)}\]&lt;/p&gt;
+
+&lt;p&gt;\[ p(q=0.6|X_1=1,X_2=1) = \frac {p(q=0.6)\cdotp(X_1=1,X_2=1|q=0.6)} {p(X_1=1,X_2=1)} = \frac {0.1\cdot0.6\cdot0.6} {p(X_1=1,X_2=1)}\]&lt;/p&gt;
+
+&lt;h3 id=&quot;二者的比值--frac-09cdot05cdot05-01cdot06cdot06-lt-frac-09-01--也就是说后验上我们对06这个值的信心更高了而且随着连续观察的次数n增加我们的信息会越来越大直到最后我们几乎确定太阳升起的概率不是05而是更高的06这里对于q分布假设只是个简单的两点分布而如果我们假设q的分布更复杂一点并且其最大可能值099分配到了一个很小的非零先验概率000001类似上面的分析虽然先验很低但是不要多少天之后屌丝会逆袭届时我们将笃定太阳明天升起的概率是099&quot;&gt;二者的比值 \( \frac {0.9\cdot0.5\cdot0.5} {0.1\cdot0.6\cdot0.6} \lt \frac {0.9} {0.1} \) 也就是说后验上我们对0.6这个值的信心更高了。而且随着连续观察的次数\(n\)增加，我们的信息会越来越大，直到最后我们几乎确定&lt;em&gt;太阳升起的概率不是0.5，而是更高的0.6&lt;/em&gt;。这里对于\(q\)分布假设只是个简单的两点分布，而如果我们假设\(q\)的分布更复杂一点，并且其最大可能值0.99分配到了一个很小的非零先验概率0.00001，类似上面的分析，虽然先验很低，但是不要多少天之后屌丝会逆袭，届时我们将笃定太阳明天升起的概率是0.99。&lt;/h3&gt;</content><author><name></name></author><summary type="html">明天太阳还会照常升起吗？</summary></entry><entry><title type="html">深度学习中的数值稳定性问题一例</title><link href="http://localhost:4000/2017/10/29/numerical-stability/" rel="alternate" type="text/html" title="深度学习中的数值稳定性问题一例" /><published>2017-10-29T00:00:00+08:00</published><updated>2017-10-29T00:00:00+08:00</updated><id>http://localhost:4000/2017/10/29/numerical-stability</id><content type="html" xml:base="http://localhost:4000/2017/10/29/numerical-stability/">&lt;h1 id=&quot;深度学习中的数值稳定性问题一例&quot;&gt;深度学习中的数值稳定性问题一例&lt;/h1&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;StableBCELoss&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;nn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;modules&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Module&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+       &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;__init__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+             &lt;span class=&quot;nb&quot;&gt;super&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;StableBCELoss&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;__init__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+       &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;forward&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;input&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;target&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+             &lt;span class=&quot;n&quot;&gt;neg_abs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;input&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;abs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+             &lt;span class=&quot;n&quot;&gt;loss&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;input&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;clamp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;min&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;input&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;target&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;neg_abs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;exp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+             &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;loss&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mean&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h3 id=&quot;上面这段代码中的-forward-函数用来计算所谓的-binary-cross-entropy其实也就是逻辑回归中的损失函数&quot;&gt;上面&lt;a href=&quot;https://github.com/pytorch/pytorch/issues/751&quot;&gt;这段代码&lt;/a&gt;中的 forward 函数用来计算所谓的 binary cross entropy，其实也就是逻辑回归中的损失函数&lt;/h3&gt;
+&lt;p&gt;\[ L(y,x) = -y \cdot log(sigmoid(x))-(1-y) \cdot log(1-sigmoid(x))\]&lt;/p&gt;
+&lt;h3 id=&quot;其中-sigmoid-函数定义如下&quot;&gt;其中 sigmoid 函数定义如下：&lt;/h3&gt;
+&lt;p&gt;\[ sigmoid(x) = \frac {1} {1+e^{-x}} \]&lt;/p&gt;
+
+&lt;h3 id=&quot;既然只是为了计算各交叉熵而已为什么要搞这么复杂的两行呢&quot;&gt;既然只是为了计算各交叉熵而已，为什么要搞这么复杂的两行呢：&lt;/h3&gt;
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;neg_abs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;input&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;abs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;loss&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;input&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;clamp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;min&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;input&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;target&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;neg_abs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;exp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;h3 id=&quot;原因在于--ex--在-x-是较大正数的时候会出现溢出也就是超出计算机能表达的范围从而造成计算误差而上面这段代码就能在避免计算较大正数的自然指数的同时依然能正确的计算交叉熵可以发现上面代码的指数运算其操作数是非正数&quot;&gt;原因在于 \( e^x \) 在\( x \)是较大正数的时候会出现溢出，也就是超出计算机能表达的范围，从而造成计算误差，而上面这段代码就能在避免计算较大正数的自然指数的同时依然能正确的计算交叉熵。可以发现上面代码的指数运算其操作数是非正数。&lt;/h3&gt;
+&lt;h3 id=&quot;下面我们检查下这段代码的正确性代码中的-input-对应-l-定义中的-xtarget-对应-l-定义中的-y&quot;&gt;下面我们检查下这段代码的正确性，代码中的 input 对应 \(L\) 定义中的 \(x\)，target 对应 \(L\) 定义中的 \(y\)。&lt;/h3&gt;
+&lt;h3 id=&quot;inputclampmin0-的意思是--max0x下面分四种情况讨论这个方法的正确性&quot;&gt;input.clamp(min=0) 的意思是 \( max(0,x)\)，下面分四种情况讨论这个方法的正确性：&lt;/h3&gt;
+&lt;ol&gt;
+  &lt;li&gt;\( x \ge 0 \) 且 \( y=1 \)，此时代码计算的是：\( x-x+log(1+e^{-x}) = -log(\frac {1} {1+e^{-x}})\)，显然是正确的。&lt;/li&gt;
+  &lt;li&gt;\( x \ge 0 \) 且 \( y=0 \)，此时代码计算的是：\( x-0+log(1+e^{-x}) = log(1+e^x) = -log(1-\frac {1} {1+e^{-x}})\)，也是正确的。&lt;/li&gt;
+  &lt;li&gt;\( x \lt 0 \) 且 \( y=1 \)，此时代码计算的是：\( 0-x+log(1+e^{x}) = log(1+e^{-x})\)，是正确的。&lt;/li&gt;
+  &lt;li&gt;\( x \lt 0 \) 且 \( y=0 \)，此时代码计算的是：\( 0-0+log(1+e^{x}) = log(1+e^{-x})= -log(1-\frac {1} {1+e^{-x}})\)，同样是正确的。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;在-softmax-的计算中也有指数运算也存在这样的数值稳定性问题&quot;&gt;在 softmax 的计算中也有指数运算，也存在这样的数值稳定性问题：&lt;/h3&gt;
+
+&lt;p&gt;\[ p_k = \frac {e^{x_k}} {\sum e^{x_i}}\]&lt;/p&gt;
+
+&lt;h3 id=&quot;解决思路也是一样的就是避免较大正数的自然指数运算&quot;&gt;解决思路也是一样的，就是避免较大正数的自然指数运算：&lt;/h3&gt;
+
+&lt;p&gt;\[ p_k = \frac {e^{(x_k-max)}} {\sum e^{(x_i-max)}}\]&lt;/p&gt;
+
+&lt;h3 id=&quot;max-表示所有-x_i-的最大数这样的一个变化相当于分子分母同除以一个正数所以计算结果是不变的另外每个-x_i-max-显然都小于0于是就不存在大正数的自然指数运算这样的问题了&quot;&gt;max 表示所有 \(x_i\) 的最大数，这样的一个变化相当于分子分母同除以一个正数，所以计算结果是不变的，另外每个 \(x_i-max\) 显然都小于0，于是就不存在大正数的自然指数运算这样的问题了。&lt;/h3&gt;</content><author><name></name></author><summary type="html">深度学习中的数值稳定性问题一例</summary></entry><entry><title type="html">neural network 损失函数非凸性一例</title><link href="http://localhost:4000/2017/10/16/nn-non-conv-proof/" rel="alternate" type="text/html" title="neural network 损失函数非凸性一例" /><published>2017-10-16T00:00:00+08:00</published><updated>2017-10-16T00:00:00+08:00</updated><id>http://localhost:4000/2017/10/16/nn-non-conv-proof</id><content type="html" xml:base="http://localhost:4000/2017/10/16/nn-non-conv-proof/">&lt;h1 id=&quot;neural-network-损失函数非凸性一例&quot;&gt;neural network 损失函数非凸性一例&lt;/h1&gt;
 
 &lt;h3 id=&quot;微博上爱可可转发了一个-quora-上关于证明神经网络损失函数非凸证明的讨论回答者是鼎鼎大名的-ian-goodfellow我不确定完整理解了-gooodfellow-的意思但是以此为启发结合之前在-cs231n-课程上学到的关于可视化损失函数在低维度上图像的方法我大致形成了证明这个问题的方法&quot;&gt;微博上&lt;a href=&quot;http://weibo.com/p/1005051402400261/home?is_all=1&quot;&gt;@爱可可&lt;/a&gt;转发了一个 quora 上关于证明神经网络损失函数&lt;a href=&quot;https://www.quora.com/How-can-you-prove-that-the-loss-functions-in-Deep-Neural-nets-are-non-convex&quot;&gt;非凸证明的讨论&lt;/a&gt;，回答者是鼎鼎大名的 Ian Goodfellow。我不确定完整理解了 Gooodfellow 的意思，但是以此为启发，结合之前在 cs231n 课程上学到的关于可视化损失函数在低维度上图像的方法，我大致形成了证明这个问题的方法。&lt;/h3&gt;
 
