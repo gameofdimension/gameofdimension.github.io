@@ -1,4 +1,33 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.6.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2017-11-03T14:12:51+08:00</updated><id>http://localhost:4000/</id><entry><title type="html">明天太阳还会照常升起吗？</title><link href="http://localhost:4000/2017/11/03/bayesian-inference/" rel="alternate" type="text/html" title="明天太阳还会照常升起吗？" /><published>2017-11-03T00:00:00+08:00</published><updated>2017-11-03T00:00:00+08:00</updated><id>http://localhost:4000/2017/11/03/bayesian-inference</id><content type="html" xml:base="http://localhost:4000/2017/11/03/bayesian-inference/">&lt;h1 id=&quot;明天太阳还会照常升起吗&quot;&gt;明天太阳还会照常升起吗？&lt;/h1&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.6.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2017-11-22T14:47:04+08:00</updated><id>http://localhost:4000/</id><entry><title type="html">我所理解的 AlphaGo Zero 算法</title><link href="http://localhost:4000/2017/11/22/alphago-zero/" rel="alternate" type="text/html" title="我所理解的 AlphaGo Zero 算法" /><published>2017-11-22T00:00:00+08:00</published><updated>2017-11-22T00:00:00+08:00</updated><id>http://localhost:4000/2017/11/22/alphago-zero</id><content type="html" xml:base="http://localhost:4000/2017/11/22/alphago-zero/">&lt;h1 id=&quot;我所理解的-alphago-zero-算法&quot;&gt;我所理解的 AlphaGo Zero 算法&lt;/h1&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;神经网络只有一张，输入是棋局最近16步，双方各自最近8步的历史棋局状态。&lt;/li&gt;
+  &lt;li&gt;神经网络用来拟合两个函数，因而有两个输出。其中一个输出是一个离散分布，给出19*19个位置和 pass 共362个动作选项的概率分布。另一个输出是-1和1之间的实数值，表示对当前局面的一个打分，-1表示输，1表示赢。&lt;/li&gt;
+  &lt;li&gt;算法主要分为两个部分，一部分是神经网络的训练和评估；另一部分则是基于 MCTS 的自我走子。&lt;/li&gt;
+  &lt;li&gt;对于围棋这种完全信息的零和博弈，理论上是可以用搜索算法完美解决的。当然前提是我们有足够的计算资源，而这一点是没法做到的，毕竟搜索的状态空间比全宇宙的原子数还要多。&lt;/li&gt;
+  &lt;li&gt;神经网络的作用是在不搜索到状态树根据规则胜负已分的局面的前提下也能给出对当前局面的一个比较合理的评估。&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;整个算法表示在下图中：
+ &lt;img src=&quot;https://gameofdimension.github.io/images/15113235674954.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;每一个自我走子（self-play）阶段包含25,000局自我对战的棋局，每一局都要战到最后状态。&lt;/li&gt;
+  &lt;li&gt;每一步的具体走子选择经由 1,600 次模拟（搜索）决定，每一次模拟都是在当前的搜索树中进行。&lt;/li&gt;
+  &lt;li&gt;每一次走子搜索的结果是一个概率分布，给出的是当前状态下搜索过程认为的下子选择，这个走子选择被认为优于神经网络走子选择，因此是神经网络的拟合对象，这个概率分布以及当前的棋局状态会保存下来作为后续神经网络的训练数据。&lt;/li&gt;
+  &lt;li&gt;每一局自我走子走到最后，根据围棋规则可以分出胜负，从而被打分-1或者1，也就是上图中的 z 值。这个值会和上面的搜索过程走子概率分布一样附加到每一步的棋局状态上，作为神经网络要拟合的另一个目标。&lt;/li&gt;
+  &lt;li&gt;神经网络训练会从积累的训练数据集中抽取数据进行训练，训练完成之后会使用该网络和之前的网络进行对抗，如果新网络胜率超过55%，则将更新当前网络为新网络。并循环执行以上各步骤。&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;搜索过程如下：
+&lt;img src=&quot;https://gameofdimension.github.io/images/15113272393954.jpg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;搜索树中节点代表棋局状态，边代表走子选择，每一条边上会有几个数值，这几个数值是搜索过程中走子选择的依据。每一次具体的搜索过程也会改变搜索路径上每一条边的这些值。&lt;/li&gt;
+  &lt;li&gt;每当搜索树扩展出新节点时，新节点下的走子选择以及新节点的价值会由当前的神经网络给出。得到的新节点的价值会导致路径上各条边的价值都得到更新。每次扩展到新节点也表示本次搜索过程结束。&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;参考：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://deepmind.com/documents/119/agz_unformatted_nature.pdf&quot;&gt;Mastering the Game of Go without Human Knowledge - DeepMind&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://medium.com/applied-data-science/alphago-zero-explained-in-one-diagram-365f5abf67e0&quot;&gt;AlphaGo Zero Explained In One Diagram&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">我所理解的 AlphaGo Zero 算法</summary></entry><entry><title type="html">明天太阳还会照常升起吗？</title><link href="http://localhost:4000/2017/11/03/bayesian-inference/" rel="alternate" type="text/html" title="明天太阳还会照常升起吗？" /><published>2017-11-03T00:00:00+08:00</published><updated>2017-11-03T00:00:00+08:00</updated><id>http://localhost:4000/2017/11/03/bayesian-inference</id><content type="html" xml:base="http://localhost:4000/2017/11/03/bayesian-inference/">&lt;h1 id=&quot;明天太阳还会照常升起吗&quot;&gt;明天太阳还会照常升起吗？&lt;/h1&gt;
 
 &lt;h3 id=&quot;罗辑思维讲过贝叶斯思维即所谓不断用新的证据还更新自己的原有认知作为理科生要让文科生来科普贝叶斯自然羞耻但同样羞耻的是我居然不知道这样的更新过程在数学上到底是如何实现的&quot;&gt;罗辑思维讲过贝叶斯思维，即所谓不断用新的证据还更新自己的原有认知。作为理科生要让文科生来科普贝叶斯自然羞耻，但同样羞耻的是我居然不知道这样的更新过程在数学上到底是如何实现的。&lt;/h3&gt;
 
