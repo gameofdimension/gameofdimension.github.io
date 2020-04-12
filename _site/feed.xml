@@ -1,4 +1,105 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.6.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2017-11-22T14:47:04+08:00</updated><id>http://localhost:4000/</id><entry><title type="html">我所理解的 AlphaGo Zero 算法</title><link href="http://localhost:4000/2017/11/22/alphago-zero/" rel="alternate" type="text/html" title="我所理解的 AlphaGo Zero 算法" /><published>2017-11-22T00:00:00+08:00</published><updated>2017-11-22T00:00:00+08:00</updated><id>http://localhost:4000/2017/11/22/alphago-zero</id><content type="html" xml:base="http://localhost:4000/2017/11/22/alphago-zero/">&lt;h1 id=&quot;我所理解的-alphago-zero-算法&quot;&gt;我所理解的 AlphaGo Zero 算法&lt;/h1&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.6.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-04-12T15:39:00+08:00</updated><id>http://localhost:4000/</id><entry><title type="html">gumbel 与 softmax</title><link href="http://localhost:4000/2020/04/09/gumbel/" rel="alternate" type="text/html" title="gumbel 与 softmax" /><published>2020-04-09T00:00:00+08:00</published><updated>2020-04-09T00:00:00+08:00</updated><id>http://localhost:4000/2020/04/09/gumbel</id><content type="html" xml:base="http://localhost:4000/2020/04/09/gumbel/">&lt;h1 id=&quot;gumbel-与-softmax&quot;&gt;gumbel 与 softmax&lt;/h1&gt;
+
+&lt;h3 id=&quot;对于变量-x_1x_2x_k以及标准-gumbel-分布上的噪声-epsilon_1epsilon_2epsilon_k以下操作&quot;&gt;对于变量 \(x_1,x_2,..x_k\)，以及&lt;a href=&quot;https://en.wikipedia.org/wiki/Gumbel_distribution&quot;&gt;标准 gumbel 分布&lt;/a&gt;上的噪声 \(\epsilon_1,\epsilon_2,..\epsilon_k\)，以下操作：&lt;/h3&gt;
+
+&lt;p&gt;\[argmax(x_1+\epsilon_1, x_2+\epsilon_2,..x_k+\epsilon_k)\]&lt;/p&gt;
+
+&lt;h3 id=&quot;等同于在-softmaxx_1x_2x_k-这个多元离散分布上采样&quot;&gt;等同于在 \(softmax(x_1,x_2,..x_k)\) 这个多元离散分布上采样。&lt;/h3&gt;
+
+&lt;h2 id=&quot;证明&quot;&gt;证明：&lt;/h2&gt;
+
+&lt;h3 id=&quot;在-softmaxx_1x_2x_k-采样得到-i-的概率是&quot;&gt;在 \(softmax(x_1,x_2,..x_k)\) 采样得到 \(i\) 的概率是：&lt;/h3&gt;
+&lt;p&gt;\[ \frac{e^{x_i}}{\sum_{j=1}^{k}e^{x_j}} \tag{*} \]&lt;/p&gt;
+
+&lt;h3 id=&quot;另一方面-argmaxx_1epsilon_1-x_2epsilon_2x_kepsilon_ki-的意思是说&quot;&gt;另一方面 \(argmax(x_1+\epsilon_1, x_2+\epsilon_2,..x_k+\epsilon_k)=i\) 的意思是说&lt;/h3&gt;
+&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;% &lt;![CDATA[
+x_1+\epsilon_1&lt;x_i+\epsilon_i \\
+x_2+\epsilon_2&lt;x_i+\epsilon_i \\
+...\\
+x_k+\epsilon_k&lt;x_i+\epsilon_i \\ %]]&gt;&lt;/script&gt;&lt;/p&gt;
+&lt;h3 id=&quot;等价于&quot;&gt;等价于&lt;/h3&gt;
+&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;% &lt;![CDATA[
+\epsilon_1&lt;x_i+\epsilon_i-x_1 \\
+\epsilon_2&lt;x_i+\epsilon_i-x_2 \\
+...\\
+\epsilon_k&lt;x_i+\epsilon_i-x_k \\ %]]&gt;&lt;/script&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;给定-epsilon_i-其概率为&quot;&gt;给定 \(\epsilon_i\) ，其概率为：&lt;/h3&gt;
+&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;\prod_{j\neq{i}}e^{-e^{-(x_i+\epsilon_i-x_j)}} \\
+=e^{-\sum_{j\neq{i}}e^{-(x_i+\epsilon_i-x_j)}}&lt;/script&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;遍历-epsilon_i-的所有取值&quot;&gt;遍历 \(\epsilon_i\) 的所有取值，&lt;/h3&gt;
+&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;p\{argmax(x_1+\epsilon_1, x_2+\epsilon_2,..x_k+\epsilon_k)=i\} \\
+=\int^{+\infty}_{-\infty} e^{-\epsilon_i-e^{-\epsilon_i}}\cdot e^{-\sum_{j\neq{i}}e^{-(x_i+\epsilon_i-x_j)}} d\epsilon_i&lt;/script&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;指数部分化简为&quot;&gt;指数部分化简为：&lt;/h3&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;-\epsilon_i-e^{-\epsilon_i}\cdot {(1+\sum_{j\neq{i}}\frac{e^{x_j}}{e^{x_i}})} \\
+=-\epsilon_i-\frac {e^{-\epsilon_i}} {\frac{e^{x_i}}{\sum_{j=1}^{k} e^{x_j}}}&lt;/script&gt;
+
+&lt;h3 id=&quot;令-fracex_isum_j1k-ex_ja-上面的积分可表示为&quot;&gt;令 \({\frac{e^{x_i}}{\sum_{j=1}^{k} e^{x_j}}}=a\) ，上面的积分可表示为：&lt;/h3&gt;
+&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;\int^{+\infty}_{-\infty} e^{-\epsilon_i-\frac{e^{-\epsilon_i}}{a}}d\epsilon_i&lt;/script&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;通过-wolfram-网站可得该积分为-a-cdot-efrac1acdot--e-xinfty_-infty--a-从而也就说明-pargmaxx_1epsilon_1-x_2epsilon_2x_kepsilon_kifracex_isum_j1k-ex_j&quot;&gt;通过 wolfram 网站可得该积分为 \(a \cdot e^{\frac{1}{a}\cdot -e^{-x}}|^{+\infty}_{-\infty} = a\) ，从而也就说明 &lt;script type=&quot;math/tex&quot;&gt;p\{argmax(x_1+\epsilon_1, x_2+\epsilon_2,..x_k+\epsilon_k)=i\}={\frac{e^{x_i}}{\sum_{j=1}^{k} e^{x_j}}}&lt;/script&gt;&lt;/h3&gt;
+
+&lt;h3 id=&quot;结合--式命题得证&quot;&gt;结合 (*) 式，命题得证。&lt;/h3&gt;
+
+&lt;h2 id=&quot;作用&quot;&gt;作用：&lt;/h2&gt;
+
+&lt;h3 id=&quot;当需要将多元离散分布上的样本作为神经网络的输入时一种方法是将该采样以-onehot-编码传入神经网络通常这一操作可用带温度-softmax-来模拟&quot;&gt;当需要将多元离散分布上的样本作为神经网络的输入时，一种方法是将该采样以 onehot 编码传入神经网络。通常这一操作可用带温度 \(softmax\) 来模拟：&lt;/h3&gt;
+&lt;p&gt;\(softmax(\frac{x_1+\epsilon_1}{T}, \frac{x_2+\epsilon_2}{T},..\frac{x_k+\epsilon_k}{T})\)&lt;/p&gt;
+
+&lt;h3 id=&quot;其中-t-越小近似程度越高&quot;&gt;其中 \(T\) 越小，近似程度越高。&lt;/h3&gt;
+&lt;h3 id=&quot;如果-x_1x_2x_k-是一个神经网络的输出那么通过上面的加-gumbel-噪声以及带温度的-softmax-两个操作我们用可导连续计算模拟了不可导的采样动作从而沟通了两个神经网络使得反向梯度传播成为可能类比于-vae-中对高斯分布采样的-reparameter-trick这里是对多元离散分布的-reparameter-trick-&quot;&gt;如果 \(x_1,x_2..x_k\) 是一个神经网络的输出，那么通过上面的加 \(gumbel\) 噪声以及带温度的 \(softmax\) 两个操作，我们用可导连续计算模拟了不可导的采样动作，从而沟通了两个神经网络，使得反向梯度传播成为可能。类比于 VAE 中对高斯分布采样的 reparameter trick，这里是对多元离散分布的 reparameter trick 。&lt;/h3&gt;
+
+&lt;h2 id=&quot;reference&quot;&gt;reference：&lt;/h2&gt;
+
+&lt;p&gt;https://en.wikipedia.org/wiki/Gumbel_distribution&lt;/p&gt;
+
+&lt;p&gt;https://lips.cs.princeton.edu/the-gumbel-max-trick-for-discrete-distributions/&lt;/p&gt;
+
+&lt;p&gt;https://arxiv.org/pdf/1611.01144.pdf&lt;/p&gt;</content><author><name></name></author><summary type="html">gumbel 与 softmax</summary></entry><entry><title type="html">simhash 原理</title><link href="http://localhost:4000/2020/04/04/simhash/" rel="alternate" type="text/html" title="simhash 原理" /><published>2020-04-04T00:00:00+08:00</published><updated>2020-04-04T00:00:00+08:00</updated><id>http://localhost:4000/2020/04/04/simhash</id><content type="html" xml:base="http://localhost:4000/2020/04/04/simhash/">&lt;h1 id=&quot;simhash-原理&quot;&gt;simhash 原理&lt;/h1&gt;
+
+&lt;h3 id=&quot;simhash-算法一般用来计算两个文本的相似度&quot;&gt;simhash 算法一般用来计算两个文本的相似度。&lt;/h3&gt;
+
+&lt;hr /&gt;
+
+&lt;h3 id=&quot;设想两个文本被表示成两个向量向量中元素的值表示一个特征的权重比如某个词的出现频数&quot;&gt;设想两个文本被表示成两个向量，向量中元素的值表示一个特征的权重，比如某个词的出现频数。&lt;/h3&gt;
+
+&lt;p&gt;\[v_i=(w^{(i)}_1, w^{(i)}_2 .. w^{(i)}_D)\]&lt;/p&gt;
+
+&lt;p&gt;\[v_j=(w^{(j)}_1, w^{(j)}_2 .. w^{(j)}_D)\]&lt;/p&gt;
+
+&lt;h3 id=&quot;对于两个向量如何估计其相似度一种方法是计算余弦相似度实际应用中两两计算余弦相似度的开销可能过高尤其是特征特别多的情况下如果我们能将特征向量转换成较短的签名可能可以提高计算效率&quot;&gt;对于两个向量，如何估计其相似度？一种方法是计算余弦相似度。实际应用中，两两计算余弦相似度的开销可能过高，尤其是特征特别多的情况下。如果我们能将特征向量转换成较短的签名，可能可以提高计算效率。&lt;/h3&gt;
+
+&lt;h3 id=&quot;对于-d-维随机向量-u-v_i-cdot-u-与-v_j-cdot-u-符号相反的概率正比于-v_i-v_j-的夹角大小&quot;&gt;对于 \(D\) 维随机向量 \(u\) ，\(v_i \cdot u\) 与 \(v_j \cdot u\) 符号相反的概率正比于 \(v_i, v_j\) 的夹角大小。&lt;/h3&gt;
+
+&lt;h3 id=&quot;选定-n-个随机向量-u_1n-以下两个向量&quot;&gt;选定 \(n\) 个随机向量 \(u_{1..n}\) ，以下两个向量&lt;/h3&gt;
+&lt;p&gt;\[(sgn(v_i \cdot u_1), sgn(v_i \cdot u_2) .. sgn(v_i \cdot u_n))^T\]&lt;/p&gt;
+
+&lt;p&gt;\[(sgn(v_j \cdot u_1), sgn(v_j \cdot u_2) .. sgn(v_j \cdot u_n))^T\]&lt;/p&gt;
+&lt;h3 id=&quot;的海明距离正比于-v_i-v_j-的夹角大小&quot;&gt;的海明距离正比于 \(v_i, v_j\) 的夹角大小。&lt;/h3&gt;
+
+&lt;h3 id=&quot;海明距离在计算机中计算效率非常高如果同时适当控制-n-的大小我们可以得到一种更高效估计文本相似度的方法&quot;&gt;海明距离在计算机中计算效率非常高，如果同时适当控制 \(n\) 的大小，我们可以得到一种更高效估计文本相似度的方法。&lt;/h3&gt;
+
+&lt;hr /&gt;
+
+&lt;h3 id=&quot;simhash-将每个特征-hash-到一个大整数比如-64-bit得到-d-个大整数&quot;&gt;simhash 将每个特征 hash 到一个大整数（比如 64 bit），得到 \(D\) 个大整数：&lt;/h3&gt;
+&lt;p&gt;\[(hash(f_1), hash(f_2)..hash(f_D))\]&lt;/p&gt;
+
+&lt;h3 id=&quot;将每个大整数比特位的-0-换成--1-并表示成向量形式上述向量可写成矩阵&quot;&gt;将每个大整数比特位的 \(0\) 换成 \(-1\) ，并表示成向量形式，上述向量可写成矩阵：&lt;/h3&gt;
+&lt;p&gt;&lt;script type=&quot;math/tex&quot;&gt;% &lt;![CDATA[
+\left( \begin{array}{ccc}
+b^{(1)}_1 &amp; b^{(2)}_1 &amp; .. &amp; b^{(D)}_1 \\
+b^{(1)}_2 &amp; b^{(2)}_2 &amp; .. &amp; b^{(D)}_2 \\
+\vdots &amp; \vdots &amp; \vdots &amp; \vdots \\
+b^{(1)}_{64} &amp; b^{(2)}_{64} &amp; .. &amp; b^{(D)}_{64} \end{array} \right) %]]&gt;&lt;/script&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;根据-hash-函数的性质其中的每一行可看成一个随机向量&quot;&gt;根据 hash 函数的性质，其中的每一行可看成一个随机向量。&lt;/h3&gt;
+
+&lt;h3 id=&quot;simhash-算法中将文档各特征的权重向量与该矩阵行向量做点乘并取符号得到的-64-位向量作为该文档的-simhash-文档之间的相似度用海明距离来度量&quot;&gt;simhash 算法中将文档各特征的权重向量与该矩阵行向量做点乘并取符号，得到的 64 位向量作为该文档的 simhash ，文档之间的相似度用海明距离来度量。&lt;/h3&gt;
+
+&lt;h3 id=&quot;可以看到这种做法原理上与上面取定随机向量的方法是一致的唯一的区别在于并不是取定-64-个随机向量而是通过对特征做-hash-的方法得到-64-个向量这样得到的向量依然具有随机性质&quot;&gt;可以看到这种做法原理上与上面取定随机向量的方法是一致的，唯一的区别在于并不是取定 64 个随机向量，而是通过对特征做 hash 的方法得到 64 个向量，这样得到的向量依然具有随机性质。&lt;/h3&gt;</content><author><name></name></author><summary type="html">simhash 原理</summary></entry><entry><title type="html">我所理解的 AlphaGo Zero 算法</title><link href="http://localhost:4000/2017/11/22/alphago-zero/" rel="alternate" type="text/html" title="我所理解的 AlphaGo Zero 算法" /><published>2017-11-22T00:00:00+08:00</published><updated>2017-11-22T00:00:00+08:00</updated><id>http://localhost:4000/2017/11/22/alphago-zero</id><content type="html" xml:base="http://localhost:4000/2017/11/22/alphago-zero/">&lt;h1 id=&quot;我所理解的-alphago-zero-算法&quot;&gt;我所理解的 AlphaGo Zero 算法&lt;/h1&gt;
 
 &lt;ol&gt;
   &lt;li&gt;神经网络只有一张，输入是棋局最近16步，双方各自最近8步的历史棋局状态。&lt;/li&gt;
