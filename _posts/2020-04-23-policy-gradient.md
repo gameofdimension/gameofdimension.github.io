@@ -18,7 +18,7 @@ $$\sum_{\tau}{p_{\theta}(\tau)\nabla_{\theta}log\{\pi_{\theta}(a_{t+k}|s_{t+k})\
 \sum_{s_0,a_0..s_{t+k},a_{t+k}}\sum_{s_{t+k+1},a_{t+k+1}..s_{T-1},a_{T-1}}p(s_0)\cdot \prod_{i=0}^{T-1}\pi_{\theta}(a_i|s_i)\cdot p(s_{i+1}|s_i,a_i)\cdot \\
 \nabla_{\theta}log\{\pi_{\theta}(a_{t+k}|s_{t+k})\}r_t=\\
 \sum_{s_0,a_0..s_{t+k},a_{t+k}}p(s_0)\cdot \prod_{i=0}^{t+k-1}\pi_{\theta}(a_i|s_i)\cdot p(s_{i+1}|s_i,a_i)\cdot \pi_{\theta}(a_{t+k}|s_{t+k})\nabla_{\theta}log\{\pi_{\theta}(a_{t+k}|s_{t+k})\}r_t \cdot \\
-\sum_{s_{t+k+1},a_{t+k+1}..s_{T-1},a_{T-1}} p(s_{i+1}|s_i,a_i) \cdot\prod_{i=t+k+1}^{T-1}\pi_{\theta}(a_i|s_i)\cdot p(s_{i+1}|s_i,a_i)$$
+\sum_{s_{t+k+1},a_{t+k+1}..s_{T-1},a_{T-1}} p(s_{t+k+1}|s_{t+k},a_{t+k}) \cdot\prod_{i=t+k+1}^{T-1}\pi_{\theta}(a_i|s_i)\cdot p(s_{i+1}|s_i,a_i)$$
 
 ### 考察
 $$\sum_{s_0,a_0..s_{t+k},a_{t+k}}p(s_0) \prod_{i=0}^{t+k-1}\pi_{\theta}(a_i|s_i)\cdot p(s_{i+1}|s_i,a_i)\cdot \pi_{\theta}(a_{t+k}|s_{t+k})\nabla_{\theta}log\{\pi_{\theta}(a_{t+k}|s_{t+k})\}r_t=\\
